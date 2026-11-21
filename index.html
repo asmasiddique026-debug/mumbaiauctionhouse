@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUMBAI AUCTION HOUSE | Verified Heritage & Antiques</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #08080a;
+      color: #f4f4f6;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-luxury { font-family: 'Cinzel', serif; }
+    .gold-gradient {
+      background: linear-gradient(135deg, #f6d365 0%, #d4af37 50%, #aa7c11 100%);
+    }
+    .gold-text {
+      background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glass-card {
+      background: rgba(20, 20, 25, 0.85);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0d0d10; }
+    ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP SECURITY & STATUS RIBBON -->
+  <div class="bg-zinc-950 border-b border-amber-500/20 px-4 py-1.5 text-[11px] flex flex-wrap justify-between items-center text-zinc-400">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span>ATOMIC CLOUD ENGINE • SERVER-TIME ENFORCED • ZERO-LEAK VAULT</span>
+    </div>
+    <div id="kycBadgeTop" class="hidden text-amber-400 font-semibold"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 glass-card border-b border-amber-500/30 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('floor')">
+        <div class="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center text-black font-luxury font-extrabold text-xl shadow-lg shadow-amber-500/20">
+          M
+        </div>
+        <div>
+          <h1 class="font-luxury text-base sm:text-xl font-bold tracking-wider gold-text">MUMBAI AUCTION HOUSE</h1>
+          <p class="text-[10px] tracking-widest uppercase text-zinc-400">Verified Heritage & Antiques</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="switchView('floor')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition">
+          Auction Floor
+        </button>
+        <button onclick="openSellModal()" class="px-3 py-1.5 rounded-lg text-xs font-bold gold-gradient text-black hover:opacity-90 transition shadow-md">
+          + List Item
+        </button>
+        <button id="authBtn" onclick="handleAuthAction()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-black hover:bg-zinc-200 transition flex items-center gap-1.5">
+          <span>Sign In</span>
+        </button>
+        <button onclick="openAdminGate()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 border border-amber-500/50 text-amber-300 hover:bg-amber-500/25 transition">
+          Admin
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+    
+    <!-- HERO / STATS BAR -->
+    <div class="glass-card rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <span class="text-[11px] uppercase tracking-widest text-amber-400 font-semibold">Live Accredited Floor</span>
+        <h2 class="font-luxury text-2xl sm:text-3xl font-bold text-white mt-1">Rare Collectibles, Coins & Royal Artifacts</h2>
+        <p class="text-xs sm:text-sm text-zinc-400 mt-1">Every bidder & seller is KYC-verified. Concurrent bids protected by Firestore Atomic Transactions.</p>
+      </div>
+      <div class="flex gap-3 w-full md:w-auto">
+        <div class="bg-zinc-950/90 border border-zinc-800 rounded-xl px-4 py-2.5 flex-1 text-center">
+          <div id="statActiveCount" class="text-xl font-bold text-amber-400">0</div>
+          <div class="text-[10px] uppercase text-zinc-400">Live Lots</div>
+        </div>
+        <div class="bg-zinc-950/90 border border-zinc-800 rounded-xl px-4 py-2.5 flex-1 text-center">
+          <div id="statClosedCount" class="text-xl font-bold text-emerald-400">0</div>
+          <div class="text-[10px] uppercase text-zinc-400">Locked Winners</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOOR TABS -->
+    <div class="flex gap-2 mb-5 border-b border-zinc-800 pb-3">
+      <button id="tabLive" onclick="filterLots('active')" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-black">
+        Live Auctions
+      </button>
+      <button id="tabEnded" onclick="filterLots('ended')" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 text-zinc-300 hover:bg-zinc-800">
+        Closed & Locked Winners
+      </button>
+    </div>
+
+    <!-- AUCTION GRID -->
+    <div id="lotsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="col-span-full text-center py-16 text-zinc-500 text-sm">Connecting to Atomic Cloud Ledger...</div>
+    </div>
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. MANDATORY KYC MODAL -->
+  <div id="kycModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-amber-500/40 my-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-luxury text-lg font-bold gold-text">Mandatory Identity KYC</h3>
+        <button onclick="closeModal('kycModal')" class="text-zinc-400 hover:text-white text-xl">&times;</button>
+      </div>
+      <p class="text-xs text-zinc-400 mb-4">To bid or list items on Mumbai Auction House, submit government ID & live selfie. Encrypted & restricted strictly to Master Admin.</p>
+      
+      <form id="kycForm" onsubmit="submitKYC(event)" class="space-y-3">
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Full Legal Name (As per ID)</label>
+          <input type="text" id="kycFullName" required class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-amber-500 outline-none" placeholder="e.g. Aarav Sharma" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-zinc-300 block mb-1">Mobile Number</label>
+            <input type="tel" id="kycPhone" required pattern="[0-9]{10}" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" placeholder="10-digit mobile" />
+          </div>
+          <div>
+            <label class="text-xs text-zinc-300 block mb-1">PAN Number</label>
+            <input type="text" id="kycPan" required maxlength="10" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white uppercase" placeholder="ABCDE1234F" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Aadhaar Last 4 Digits</label>
+          <input type="text" id="kycAadhaarLast4" required pattern="[0-9]{4}" maxlength="4" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" placeholder="XXXX" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Upload ID Proof (Aadhaar/PAN Photo)</label>
+          <input type="file" id="kycIdFile" accept="image/*" required class="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-amber-400" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Live Camera Selfie</label>
+          <input type="file" id="kycSelfieFile" accept="image/*" capture="user" required class="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-500 file:text-black file:font-bold" />
+        </div>
+        <button type="submit" id="kycSubmitBtn" class="w-full py-2.5 rounded-xl font-bold text-sm gold-gradient text-black mt-2">
+          Verify & Unlock Auction Access
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. SELL / LIST ITEM MODAL -->
+  <div id="sellModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-amber-500/40 my-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-luxury text-lg font-bold gold-text">Submit Item for Auction</h3>
+        <button onclick="closeModal('sellModal')" class="text-zinc-400 hover:text-white text-xl">&times;</button>
+      </div>
+      <form id="sellForm" onsubmit="submitNewLot(event)" class="space-y-3">
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Artifact / Item Title</label>
+          <input type="text" id="lotTitle" required class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. 1911 King George V Silver Rupee" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Description & Provenance</label>
+          <textarea id="lotDesc" rows="2" required class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" placeholder="Condition, year, authenticity details..."></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-zinc-300 block mb-1">Public Starting Bid (₹)</label>
+            <input type="number" id="lotStartBid" required min="100" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" placeholder="5000" />
+          </div>
+          <div>
+            <label class="text-xs text-amber-400 font-semibold block mb-1">Secret Reserve Price (₹)</label>
+            <input type="number" id="lotExpectedPrice" required min="100" class="w-full bg-zinc-950 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-white" placeholder="15000" />
+          </div>
+        </div>
+        <p class="text-[10px] text-emerald-400">🔒 Zero-Leak Guarantee: Secret Reserve Price is isolated in an Admin-only vault and never sent to public browsers.</p>
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Auction Duration</label>
+          <select id="lotDuration" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
+            <option value="12">12 Hours</option>
+            <option value="24">24 Hours</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-300 block mb-1">Item Photograph</label>
+          <input type="file" id="lotImage" accept="image/*" required class="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-amber-400" />
+        </div>
+        <button type="submit" id="sellSubmitBtn" class="w-full py-2.5 rounded-xl font-bold text-sm gold-gradient text-black">
+          Publish to Live Floor
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. ADMIN SECURITY GATE MODAL -->
+  <div id="adminGateModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-card max-w-sm w-full rounded-2xl p-6 border border-amber-500/50 text-center">
+      <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500 mx-auto flex items-center justify-center text-amber-400 text-xl mb-3">
+        🛡️
+      </div>
+      <h3 class="font-luxury text-lg font-bold gold-text">Master Admin Security Gate</h3>
+      <p id="adminGateSub" class="text-xs text-zinc-400 mt-1 mb-4">Authenticated Master Gmail + Cryptographic PIN Required</p>
+      
+      <div id="adminLockoutBanner" class="hidden bg-red-950/80 border border-red-500 text-red-200 text-xs p-2.5 rounded-lg mb-3"></div>
+
+      <input type="password" id="adminPinInput" maxlength="8" inputmode="numeric" placeholder="Enter Admin PIN" class="w-full text-center tracking-[0.4em] text-lg font-bold bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-amber-400 focus:border-amber-500 outline-none mb-3" />
+      
+      <div class="flex gap-2">
+        <button onclick="closeModal('adminGateModal')" class="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-zinc-800 text-zinc-300">Cancel</button>
+        <button id="unlockAdminBtn" onclick="verifyAdminPin()" class="flex-1 py-2.5 rounded-xl text-xs font-bold gold-gradient text-black">Unlock Vault</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MASTER ADMIN COMMAND CENTER -->
+  <div id="adminPanelModal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-lg overflow-y-auto p-4">
+    <div class="max-w-6xl mx-auto glass-card rounded-2xl p-5 border border-amber-500/40 my-4">
+      <div class="flex flex-wrap justify-between items-center gap-3 border-b border-zinc-800 pb-4 mb-4">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">● Authenticated Master Session</span>
+          <h2 class="font-luxury text-xl font-bold gold-text">Mumbai Auction House — Command Center</h2>
+        </div>
+        <button onclick="closeModal('adminPanelModal')" class="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white">Exit Admin</button>
+      </div>
+
+      <!-- ADMIN TABS -->
+      <div class="flex flex-wrap gap-2 mb-5">
+        <button onclick="switchAdminTab('lots')" id="admTabLots" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-black">1. Lots & Secret Reserves</button>
+        <button onclick="switchAdminTab('kyc')" id="admTabKyc" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 text-zinc-300">2. Verified KYC Vault</button>
+        <button onclick="switchAdminTab('logs')" id="admTabLogs" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 text-zinc-300">3. Security Audit Logs</button>
+        <button onclick="switchAdminTab('pin')" id="admTabPin" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 text-zinc-300">4. Security & PIN</button>
+      </div>
+
+      <div id="adminTabContent" class="min-h-[300px]"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-zinc-900 border border-amber-500/60 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-medium max-w-xs"></div>
+
+  <!-- FIREBASE SDK & HARDENED ATOMIC ENGINE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+      getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, 
+      addDoc, onSnapshot, query, orderBy, runTransaction, serverTimestamp, Timestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0F2WtZK5FBylw0ySAjystpeB1tHr25yI",
+      authDomain: "mumbai-auction-house.firebaseapp.com",
+      projectId: "mumbai-auction-house",
+      storageBucket: "mumbai-auction-house.firebasestorage.app",
+      messagingSenderId: "28536933129",
+      appId: "1:28536933129:web:b99fe4ed793f4ebcc861d8",
+      measurementId: "G-2P3Z43NWGX"
+    };
+
+    const MASTER_ADMIN_EMAIL = "asmasiddique026@gmail.com";
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let userProfile = null;
+    let allLots = [];
+    let currentFilter = 'active';
+    let adminUnlocked = false;
+    let failedPinAttempts = 0;
+    let lockoutUntil = 0;
+
+    // SHA-256 Helper for PIN Hashing
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // Client-side Image Compressor (Stores safely under Firestore 1MB doc limit)
+    function compressImage(file, maxWidth = 720, quality = 0.65) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const scale = Math.min(1, maxWidth / img.width);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+        };
+        reader.onerror = reject;
+      });
+    }
+
+    window.showToast = (msg, isError = false) => {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold max-w-xs border ${isError ? 'bg-red-950 border-red-500 text-red-200' : 'bg-zinc-900 border-amber-500 text-amber-200'}`;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 4000);
+    };
+
+    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+    async function logSecurityEvent(action, details) {
+      try {
+        await addDoc(collection(db, "auditLogs"), {
+          action,
+          details,
+          actorEmail: currentUser ? currentUser.email : "anonymous",
+          actorUid: currentUser ? currentUser.uid : "none",
+          timestamp: serverTimestamp()
+        });
+      } catch (e) { /* Silent if unauthenticated */ }
+    }
+
+    // AUTH LISTENER
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      adminUnlocked = false;
+      const authBtn = document.getElementById('authBtn');
+      const kycBadge = document.getElementById('kycBadgeTop');
+
+      if (user) {
+        authBtn.innerHTML = `<img src="${user.photoURL || ''}" class="w-4 h-4 rounded-full"/> <span>Sign Out</span>`;
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (userSnap.exists()) {
+          userProfile = userSnap.data();
+          kycBadge.textContent = `✓ KYC VERIFIED: ${userProfile.fullName.toUpperCase()}`;
+          kycBadge.classList.remove('hidden');
+        } else {
+          userProfile = null;
+          kycBadge.textContent = `⚠ KYC PENDING (REQUIRED TO BID/SELL)`;
+          kycBadge.classList.remove('hidden');
+        }
+      } else {
+        userProfile = null;
+        authBtn.innerHTML = `<span>Sign In</span>`;
+        kycBadge.classList.add('hidden');
+      }
+      renderLots();
+    });
+
+    window.handleAuthAction = async () => {
+      if (currentUser) {
+        await signOut(auth);
+        showToast("Signed out securely.");
+      } else {
+        try {
+          await signInWithPopup(auth, provider);
+          showToast("Signed in with Google!");
+        } catch (err) {
+          showToast("Login failed: " + err.message, true);
+        }
+      }
+    };
+
+    // SUBMIT KYC
+    window.submitKYC = async (e) => {
+      e.preventDefault();
+      if (!currentUser) return showToast("Please Sign In first.", tru
